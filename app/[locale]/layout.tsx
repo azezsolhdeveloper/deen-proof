@@ -21,8 +21,13 @@ const cairo = Cairo({
 export const metadata: Metadata = {
   title: 'DeenProof | برهان الدين',
   description: 'موسوعة شاملة للرد على الشبهات الإسلامية',
-  // 3. هذا هو السطر الأهم الذي يصلح مشاكل العرض على الهاتف
-  viewport: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 // --- نهاية الإصلاح ---
 
