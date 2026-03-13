@@ -1,7 +1,12 @@
-import type { NextConfig } from "next";
+// next.config.mjs (النسخة النهائية مع الإعداد الصحيح)
+import createNextIntlPlugin from 'next-intl/plugin';
 
-const nextConfig: NextConfig = {
-  /* config options here */
+// هذا السطر يخبر next-intl بمكان ملف التكوين الجديد
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // لا توجد أي إعدادات أخرى هنا
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);
