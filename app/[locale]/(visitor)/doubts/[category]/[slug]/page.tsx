@@ -16,18 +16,26 @@ import DoubtStats from '@/app/components/DoubtStats'; // ✅ استيراد مك
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  const allParams = await getStaticParamsForDoubts();
-  const paths = [];
-  for (const locale of locales) {
-    for (const params of allParams) {
-      paths.push({
-        locale: locale,
-        category: params.category,
-        slug: params.slug,
-      });
+  try {
+    const allParams = await getStaticParamsForDoubts();
+
+    const paths = [];
+
+    for (const locale of locales) {
+      for (const params of allParams) {
+        paths.push({
+          locale: locale,
+          category: params.category,
+          slug: params.slug,
+        });
+      }
     }
+
+    return paths;
+  } catch (error) {
+    console.error("Failed to fetch static params:", error);
+    return [];
   }
-  return paths;
 }
 
 type PageProps = {
