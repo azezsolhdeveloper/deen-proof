@@ -53,9 +53,8 @@ const page = resolvedSearchParams['page'] ?? '1';
   }
 
   return (
-    <div className="relative w-full min-h-screen select-none">
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute -top-[20%] -right-[10%] w-[70vw] h-[70vw] rounded-full bg-gradient-to-br from-purple-50 to-pink-100/50 blur-[120px]" />
+<div className="relative w-full min-h-screen overflow-x-hidden max-w-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+<div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">        <div className="absolute -top-[20%] -right-[10%] w-[70vw] h-[70vw] rounded-full bg-gradient-to-br from-purple-50 to-pink-100/50 blur-[120px]" />
         <div className="absolute bottom-0 -left-[10%] w-[60vw] h-[60vw] rounded-full bg-gradient-to-tr from-blue-50 to-indigo-50/50 blur-[100px]" />
       </div>
 

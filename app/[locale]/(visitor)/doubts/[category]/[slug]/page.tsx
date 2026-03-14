@@ -115,9 +115,10 @@ const relatedDoubts: PublicDoubt[] = allDoubts
 <p className="text-lg text-blue-900/70 mb-6">{summary}</p>
 {/* --- ✅✅✅ هذا هو المكان الصحيح لإضافة الإحصائيات --- */}
 <DoubtStats 
+    doubtId={doubt.id.toString()} // ✅ تحويل الرقم إلى نص هنا
     viewCount={doubt.viewCount} 
     likeCount={doubt.likeCount} 
-    className="mb-6" // نضيف مسافة سفلية
+    className="mb-6" 
 />
 {/* --- نهاية الإضافة --- */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-sm text-slate-500">
