@@ -63,7 +63,8 @@ export const addClaimToDoubt = async (doubtId: string | number, claimData: Parti
 };
 
 export const updateClaim = async (claimId: number, claimData: Partial<Claim>): Promise<void> => {
-  await api.put(`/claims/${claimId}`, claimData);
+  // أضفنا "doubts/" إلى بداية المسار
+  await api.put(`/doubts/claims/${claimId}`, claimData);
 };
 
 export const deleteClaim = async (claimId: number): Promise<void> => {
