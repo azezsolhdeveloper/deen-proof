@@ -196,7 +196,8 @@
   "feedback": "الملاحظات",
   "logout": "خروج",
   "logoutTitle": "تسجيل الخروج",
-  "profileTitle": "الملف الشخصي"
+  "profileTitle": "الملف الشخصي",
+  "search": "بحث"
 },
 
   "LoginPage": {
@@ -268,7 +269,8 @@
     "category_quran": "شبهات حول القرآن",
     "category_prophet": "شبهات حول النبي ﷺ",
     "category_science": "الإسلام والعلم",
-    "category_history": "شبهات تاريخية"
+    "category_history": "شبهات تاريخية",
+    "confirmActionTitle": "تأكيد الإجراء"
   },
   "ReviewPage": {
     "pageTitle": "مراجعة الرد",
@@ -351,6 +353,22 @@
 "ConfirmationModal": {
     "confirmButton": "تأكيد",
     "cancelButton": "إلغاء"
+  },
+   "SearchPage": {
+    "pageTitle": "بحث شامل في المحتوى",
+    "pageSubtitle": "ابحث عن أي محتوى في النظام، بغض النظر عن حالته.",
+    "searchPlaceholder": "ابحث في العناوين...",
+    "allStatuses": "كل الحالات",
+    "allAuthors": "كل المؤلفين",
+    "author": "المؤلف",
+    "lastUpdated": "آخر تحديث",
+    "startTyping": "ابدأ بالكتابة أو اختر فلترًا لعرض النتائج.",
+    "noResults": "لم يتم العثور على نتائج تطابق بحثك.",
+    "Published": "منشور",
+    "Draft": "مسودة",
+    "NeedsRevision": "يحتاج تعديل",
+    "PendingReview": "قيد المراجعة",
+    "PendingApproval": "بانتظار الموافقة"
   }
  
 

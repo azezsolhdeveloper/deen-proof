@@ -197,7 +197,22 @@ export const getCategoryStats = async (): Promise<{ category: string; count: num
     return response.data;
 };
 
+export const searchAllDoubts = async (filters: { searchTerm?: string; status?: string; authorId?: number }) => {
+  const params = new URLSearchParams();
+  if (filters.searchTerm) params.append('searchTerm', filters.searchTerm);
+  if (filters.status) params.append('status', filters.status);
+  if (filters.authorId) params.append('authorId', filters.authorId.toString());
 
+  // نستخدم try-catch لمعالجة الأخطاء بشكل أفضل
+  try {
+    const response = await api.get(`/doubts/search-all?${params.toString()}`);
+    return response.data;
+  } catch (error) {
+    console.error("API Error in searchAllDoubts:", error);
+    // إرجاع مصفوفة فارغة في حالة حدوث خطأ لمنع تعطل الواجهة
+    return []; 
+  }
+};
 /**
  * البحث في الردود المنشورة باستخدام مصطلح بحث.
  * @param query - مصطلح البحث.

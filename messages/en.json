@@ -198,7 +198,8 @@
   "feedback": "Feedback",
   "logout": "Logout",
   "logoutTitle": "Sign Out",
-  "profileTitle": "Profile"
+  "profileTitle": "Profile",
+  "search": "Search"
 },
 
   "LoginPage": {
@@ -270,7 +271,8 @@
     "category_quran": "Quranic Claims",
     "category_prophet": "Prophetic Claims",
     "category_science": "Islam & Science",
-    "category_history": "Historical Claims"
+    "category_history": "Historical Claims",
+    "confirmActionTitle": "Confirm Action"
   },
   "ReviewPage": {
     "pageTitle": "Review Response",
@@ -353,6 +355,22 @@
 "ConfirmationModal": {
     "confirmButton": "Confirm",
     "cancelButton": "Cancel"
+  },
+  "SearchPage": {
+    "pageTitle": "Comprehensive Content Search",
+    "pageSubtitle": "Find any content in the system, regardless of its status.",
+    "searchPlaceholder": "Search by title...",
+    "allStatuses": "All Statuses",
+    "allAuthors": "All Authors",
+    "author": "Author",
+    "lastUpdated": "Last Updated",
+    "startTyping": "Start typing or select a filter to see results.",
+    "noResults": "No results found for your criteria.",
+    "Published": "Published",
+    "Draft": "Draft",
+    "NeedsRevision": "Needs Revision",
+    "PendingReview": "Pending Review",
+    "PendingApproval": "Pending Approval"
   }
 
 }

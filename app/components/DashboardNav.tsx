@@ -3,7 +3,7 @@
 import { Link, usePathname } from '../../i18n/routing';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '../context/AuthContext';
-import { FaTachometerAlt, FaPlus, FaList, FaUsers, FaSignOutAlt, FaUserCircle, FaInbox } from 'react-icons/fa';
+import { FaTachometerAlt, FaPlus, FaList, FaUsers, FaSignOutAlt, FaUserCircle, FaInbox, FaSearch } from 'react-icons/fa';
 
 type NavKey = 'home' | 'create' | 'review' | 'users' | 'feedback';
 
@@ -11,6 +11,8 @@ const allNavLinks = [
   { href: '/dashboard', key: 'home' as NavKey, icon: FaTachometerAlt, roles: ['Researcher', 'Reviewer', 'Admin', 'SuperAdmin'] },
   { href: '/dashboard/doubts/new', key: 'create' as NavKey, icon: FaPlus, roles: ['Researcher', 'Admin', 'SuperAdmin'] },
   { href: '/dashboard/review', key: 'review' as NavKey, icon: FaList, roles: ['Reviewer', 'Admin', 'SuperAdmin'] },
+    { href: '/dashboard/search', key: 'search' as NavKey, icon: FaSearch, roles: ['Reviewer', 'Admin', 'SuperAdmin'] },
+
   { href: '/dashboard/users', key: 'users' as NavKey, icon: FaUsers, roles: ['Admin', 'SuperAdmin'] },
   { href: '/dashboard/feedback', key: 'feedback' as NavKey, icon: FaInbox, roles: ['Admin', 'SuperAdmin'] },
 ];
