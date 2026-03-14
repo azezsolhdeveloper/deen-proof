@@ -51,7 +51,8 @@
     "copySuccess": "تم نسخ الرد إلى الحافظة!",
     "copyError": "فشل نسخ الرد.",
     "shareSuccess": "تم نسخ رابط هذا الادعاء!",
-    "shareError": "فشل نسخ الرابط."
+    "shareError": "فشل نسخ الرابط.",
+    "noSourcesForClaim": "لا توجد مصادر لهذا الادعاء." 
   },
    "ShareButtons": {
     "share": "شارك:",
@@ -274,7 +275,10 @@
     "category_prophet": "شبهات حول النبي ﷺ",
     "category_science": "الإسلام والعلم",
     "category_history": "شبهات تاريخية",
-    "confirmActionTitle": "تأكيد الإجراء"
+    "confirmActionTitle": "تأكيد الإجراء",
+    "sourceNameArPlaceholder": "اسم المصدر (بالعربية)",
+    "sourceNameEnPlaceholder": "اسم المصدر (بالإنجليزية - اختياري)"
+
   },
   "ReviewPage": {
     "pageTitle": "مراجعة الرد",

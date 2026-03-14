@@ -162,31 +162,37 @@ export default function EditDoubtPage() {
 };
 
 
-    const handleClaimSourceChange = (index: number, field: 'text' | 'url', value: string) => {
-        if (!editingClaim) return;
-        const newSources = [...editingClaim.sources];
+   const handleClaimSourceChange = (index: number, field: keyof Source, value: string) => {
+    if (!editingClaim) return;
+    const newSources = [...editingClaim.sources];
+    // تأكد من أن newSources[index] موجود قبل التعديل
+    if (newSources[index]) {
         newSources[index] = { ...newSources[index], [field]: value };
         setEditingClaim({ ...editingClaim, sources: newSources });
-    };
-    const addClaimSource = () => {
-        if (!editingClaim) return;
-        setEditingClaim({ ...editingClaim, sources: [...editingClaim.sources, { id: 0, text: '', url: '' }] });
-    };
+    }
+};
+   const addClaimSource = () => {
+    if (!editingClaim) return;
+    // أضفنا nameAr كحقل أساسي. nameEn سيكون اختياريًا.
+    setEditingClaim({ ...editingClaim, sources: [...editingClaim.sources, { id: 0, nameAr: '', url: '' }] });
+};
     const removeClaimSource = (index: number) => {
         if (!editingClaim) return;
         setEditingClaim({ ...editingClaim, sources: editingClaim.sources.filter((_, i) => i !== index) });
     };
 
-    const handleMainSourceChange = (index: number, field: 'text' | 'url', value: string) => {
-        if (!doubt) return;
-        const newSources = [...doubt.mainSources];
+   const handleMainSourceChange = (index: number, field: keyof Source, value: string) => {
+    if (!doubt) return;
+    const newSources = [...doubt.mainSources];
+    if (newSources[index]) {
         newSources[index] = { ...newSources[index], [field]: value };
         setDoubt({ ...doubt, mainSources: newSources });
-    };
-    const addMainSource = () => {
-        if (!doubt) return;
-        setDoubt({ ...doubt, mainSources: [...doubt.mainSources, { id: 0, text: '', url: '' }] });
-    };
+    }
+};
+   const addMainSource = () => {
+    if (!doubt) return;
+    setDoubt({ ...doubt, mainSources: [...doubt.mainSources, { id: 0, nameAr: '', url: '' }] });
+};
     const removeMainSource = (index: number) => {
         if (!doubt) return;
         setDoubt({ ...doubt, mainSources: doubt.mainSources.filter((_, i) => i !== index) });
@@ -293,8 +299,22 @@ export default function EditDoubtPage() {
                                                     <div key={source.id || index} className="flex items-center gap-2">
                                                         <button onClick={() => removeClaimSource(index)} className="p-2 text-red-500 hover:bg-red-100 rounded-md"><FaTrash /></button>
                                                         <input type="url" placeholder={t('urlPlaceholder')} value={source.url || ''} onChange={(e) => handleClaimSourceChange(index, 'url', e.target.value)} className="w-1/3 p-2 border border-gray-300 rounded-md text-sm" />
-                                                        <input type="text" placeholder={t('sourceTextPlaceholder')} value={source.text} onChange={(e) => handleClaimSourceChange(index, 'text', e.target.value)} className="flex-grow p-2 border border-gray-300 rounded-md text-sm" />
-                                                    </div>
+<div className="flex-grow grid grid-cols-2 gap-2">
+    <input 
+        type="text" 
+        placeholder={t('sourceNameArPlaceholder')} // سنضيف هذا للترجمة
+        value={source.nameAr} 
+        onChange={(e) => handleClaimSourceChange(index, 'nameAr', e.target.value)} 
+        className="w-full p-2 border border-gray-300 rounded-md text-sm" 
+    />
+    <input 
+        type="text" 
+        placeholder={t('sourceNameEnPlaceholder')} // سنضيف هذا للترجمة
+        value={source.nameEn || ''} 
+        onChange={(e) => handleClaimSourceChange(index, 'nameEn', e.target.value)} 
+        className="w-full p-2 border border-gray-300 rounded-md text-sm" 
+    />
+</div>                                                    </div>
                                                 ))}
                                                 <button type="button" onClick={addClaimSource} className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 mt-2"><FaPlus /><span>{t('addClaimSourceButton')}</span></button>
                                             </div>
@@ -379,8 +399,22 @@ export default function EditDoubtPage() {
                                         <div key={source.id || index} className="flex items-center gap-2">
                                             <button onClick={() => removeMainSource(index)} className="p-2 text-red-500 hover:bg-red-100 rounded-md"><FaTrash /></button>
                                             <input type="url" placeholder={t('urlPlaceholder')} value={source.url || ''} onChange={(e) => handleMainSourceChange(index, 'url', e.target.value)} className="w-1/3 p-2 border border-gray-300 rounded-md text-sm" />
-                                            <input type="text" placeholder={t('sourceTextPlaceholder')} value={source.text} onChange={(e) => handleMainSourceChange(index, 'text', e.target.value)} className="flex-grow p-2 border border-gray-300 rounded-md text-sm" />
-                                        </div>
+<div className="flex-grow grid grid-cols-2 gap-2">
+    <input 
+        type="text" 
+        placeholder={t('sourceNameArPlaceholder')} 
+        value={source.nameAr} 
+        onChange={(e) => handleMainSourceChange(index, 'nameAr', e.target.value)} 
+        className="w-full p-2 border border-gray-300 rounded-md text-sm" 
+    />
+    <input 
+        type="text" 
+        placeholder={t('sourceNameEnPlaceholder')} 
+        value={source.nameEn || ''} 
+        onChange={(e) => handleMainSourceChange(index, 'nameEn', e.target.value)} 
+        className="w-full p-2 border border-gray-300 rounded-md text-sm" 
+    />
+</div>                                        </div>
                                     ))}
                                     <button type="button" onClick={addMainSource} className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 mt-2"><FaPlus /><span>{t('addMainSourceButton')}</span></button>
                                 </div>

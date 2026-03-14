@@ -5,7 +5,8 @@
 
 export interface Source {
   id: number;
-  text: string;
+  nameAr: string;
+  nameEn?: string; // الاسم الإنجليزي اختياري
   url?: string | null;
 }
 
@@ -250,10 +251,11 @@ export interface PublicDoubtDetail {
   }[];
   // المصادر الأساسية
   mainSources: {
-    id: number;
-    name: string;
-    url: string | null;
-  }[];
+  id: number;
+  nameAr: string;
+  nameEn?: string;
+  url: string | null;
+}[];
 }
 // ====================================================================
 // 5. الأنواع العامة (General & Error Types)

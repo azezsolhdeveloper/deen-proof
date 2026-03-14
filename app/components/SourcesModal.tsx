@@ -5,6 +5,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Source } from '../services/types';
 import { FaTimes, FaExternalLinkAlt } from 'react-icons/fa';
+import { useLocale, useTranslations } from 'next-intl'; // ✅✅✅ قم بتعديل هذا السطر ✅✅✅
 
 type SourcesModalProps = {
   isOpen: boolean;
@@ -13,6 +14,8 @@ type SourcesModalProps = {
 };
 
 export default function SourcesModal({ isOpen, onClose, sources }: SourcesModalProps) {
+   const locale = useLocale(); // ✅✅✅ أضف هذا السطر ✅✅✅
+const t = useTranslations('ClaimCard');
   if (!isOpen) return null;
 
   return (
@@ -50,23 +53,29 @@ export default function SourcesModal({ isOpen, onClose, sources }: SourcesModalP
                     }
                     // --- نهاية الكود المضاف للحماية ---
 
-                    return (
-                      <li key={source.id}>
-                        <a
-                          href={finalUrl} // استخدام الرابط النهائي المحمي
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="group flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-blue-50 transition-colors"
-                        >
-                          <span className="font-medium text-slate-700 group-hover:text-blue-800">{source.text}</span>
-                          <FaExternalLinkAlt className="text-slate-400 group-hover:text-blue-600 transition-transform group-hover:scale-110" />
-                        </a>
-                      </li>
-                     );
+                   return (
+  <li key={source.id}>
+    <a
+      href={finalUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-blue-50 transition-colors"
+    >
+      {(() => {
+        // 1. نطبق المنطق الذكي لاختيار اسم المصدر الصحيح
+        const sourceName = locale === 'ar' ? source.nameAr : (source.nameEn || source.nameAr);
+        
+        // 2. نستخدم المتغير الجديد هنا
+        return <span className="font-medium text-slate-700 group-hover:text-blue-800">{sourceName}</span>;
+      })()}
+      <FaExternalLinkAlt className="text-slate-400 group-hover:text-blue-600 transition-transform group-hover:scale-110" />
+    </a>
+  </li>
+);
                   })}
                 </ul>
               ) : (
-                <p className="text-center text-slate-500 py-8">لا توجد مصادر لهذا الادعاء.</p>
+<p className="text-center text-slate-500 py-8">{t('noSourcesForClaim')}</p>
               )}
             </div>
           </motion.div>

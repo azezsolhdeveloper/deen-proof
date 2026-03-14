@@ -51,7 +51,9 @@
     "copySuccess": "Response copied to clipboard!",
     "copyError": "Failed to copy response.",
     "shareSuccess": "Link to this claim has been copied!",
-    "shareError": "Failed to copy link."
+    "shareError": "Failed to copy link.",
+    "noSourcesForClaim": "No sources are available for this claim." 
+
   },
  "ShareButtons": {
     "share": "Share:",
@@ -276,7 +278,10 @@
     "category_prophet": "Prophetic Claims",
     "category_science": "Islam & Science",
     "category_history": "Historical Claims",
-    "confirmActionTitle": "Confirm Action"
+    "confirmActionTitle": "Confirm Action",
+    "sourceNameArPlaceholder": "Source Name (Arabic)",
+    "sourceNameEnPlaceholder": "Source Name (English - optional)"
+
   },
   "ReviewPage": {
     "pageTitle": "Review Response",
