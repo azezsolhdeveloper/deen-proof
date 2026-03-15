@@ -17,7 +17,8 @@ import {
   PublicDoubtDetail,
   PaginatedResult,
    Comment,
-  AddCommentPayload
+  AddCommentPayload,
+   MyDoubt
 } from './types';
 import { FeedbackSubmission } from './types'; // ✅ استيراد النوع الجديد
 
@@ -95,6 +96,10 @@ export async function updateFeedbackStatus(id: number, isRead: boolean): Promise
 }
 export const updateUser = async (id: number, userData: CreateUserPayload): Promise<void> => {
   await api.put(`/users/${id}`, userData);
+};
+export const getMyLibrary = async (): Promise<MyDoubt[]> => { 
+  const response = await api.get('/doubts/my-library');
+  return response.data;
 };
 // --- عمليات المستخدم الحالي والمصادقة ---
 

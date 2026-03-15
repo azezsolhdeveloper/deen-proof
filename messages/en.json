@@ -201,7 +201,9 @@
   "logout": "Logout",
   "logoutTitle": "Sign Out",
   "profileTitle": "Profile",
-  "search": "Search"
+  "search": "Search",
+  "myLibrary": "My Library"
+
 },
 
   "LoginPage": {
@@ -316,7 +318,19 @@
     "addCommentOn": "Add comment on \"{section}\"",
     "confirmActionTitle": "Confirm Action",
     "confirmButton": "Yes, I'm sure",
-    "cancelButton": "Cancel"
+    "cancelButton": "Cancel",
+    "titleArLabel": "Arabic Title",
+    "titleEnLabel": "English Title",
+    "quickReplyArLabel": "Quick Reply (Arabic)",
+    "quickReplyEnLabel": "Quick Reply (English)",
+    "claimArLabel": "Claim (Arabic)",
+    "claimEnLabel": "Claim (English)",
+    "responseArLabel": "Response to Claim (Arabic)",
+    "responseEnLabel": "Response to Claim (English)",
+    "noContent": "Not provided",
+    "claimSourcesLabel": "Sources for this Claim",
+    "mainSourcesLabel": "Main Rebuttal Sources"
+
   },
   "ProfilePage": {
     "pageTitle": "Profile",
@@ -380,6 +394,16 @@
     "NeedsRevision": "Needs Revision",
     "PendingReview": "Pending Review",
     "PendingApproval": "Pending Approval"
-  }
-
+  },
+  "MyLibraryPage": {
+  "pageTitle": "My Library",
+  "pageSubtitle": "Here you can view and search all the rebuttals you have authored.",
+  "searchPlaceholder": "Search your rebuttals...",
+  "noResults": "No results found.",
+  "tableHeader_rebuttal": "Rebuttal",
+  "tableHeader_status": "Status",
+  "tableHeader_lastUpdated": "Last Updated",
+  "tableHeader_action": "Action",
+  "editAction": "Edit"
+}
 }

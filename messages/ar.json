@@ -198,7 +198,8 @@
   "logout": "خروج",
   "logoutTitle": "تسجيل الخروج",
   "profileTitle": "الملف الشخصي",
-  "search": "بحث"
+  "search": "بحث",
+  "myLibrary": "مكتبتي"
 },
 
   "LoginPage": {
@@ -313,7 +314,19 @@
     "addCommentOn": "إضافة تعليق على \"{section}\"",
     "confirmActionTitle": "تأكيد الإجراء",
     "confirmButton": "نعم، أنا متأكد",
-    "cancelButton": "إلغاء"
+    "cancelButton": "إلغاء",
+    "titleArLabel": "العنوان العربي",
+    "titleEnLabel": "العنوان الإنجليزي",
+    "quickReplyArLabel": "الرد السريع (عربي)",
+    "quickReplyEnLabel": "الرد السريع (إنجليزي)",
+    "claimArLabel": "الادعاء (عربي)",
+    "claimEnLabel": "الادعاء (إنجليزي)",
+    "responseArLabel": "الرد على الادعاء (عربي)",
+    "responseEnLabel": "الرد على الادعاء (إنجليزي)",
+    "noContent": "لا يوجد",
+    "claimSourcesLabel": "مصادر هذا الادعاء",
+    "mainSourcesLabel": "المصادر الرئيسية للرد" 
+
   },
   "ProfilePage": {
     "pageTitle": "الملف الشخصي",
@@ -377,7 +390,18 @@
     "NeedsRevision": "يحتاج تعديل",
     "PendingReview": "قيد المراجعة",
     "PendingApproval": "بانتظار الموافقة"
-  }
+  },
+  "MyLibraryPage": {
+  "pageTitle": "مكتبة أعمالي",
+  "pageSubtitle": "هنا يمكنك عرض كل الردود التي قمت بكتابتها والبحث فيها.",
+  "searchPlaceholder": "ابحث في ردودك...",
+  "noResults": "لم يتم العثور على نتائج.",
+  "tableHeader_rebuttal": "الرد",
+  "tableHeader_status": "الحالة",
+  "tableHeader_lastUpdated": "آخر تحديث",
+  "tableHeader_action": "إجراء",
+  "editAction": "تعديل"
+}
  
 
 }

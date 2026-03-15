@@ -5,13 +5,13 @@ import { useParams } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '../../../../../i18n/routing';
 import { getDoubtById, updateDoubtStatus, addComment } from '../../../../services/api';
-import { DoubtDetail, Comment, ApiError } from '../../../../services/types';
+// استيراد Claim هنا أيضًا إذا لم يكن موجودًا
+import { DoubtDetail, Comment, ApiError, Source, Claim } from '../../../../services/types';
 import { useAuth } from '../../../../context/AuthContext';
 import { useNotification } from '../../../../context/NotificationContext';
 import ConfirmationModal from '../../../../components/ConfirmationModal';
-import { FaCheck, FaTimes, FaPaperPlane, FaSpinner } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaPaperPlane, FaSpinner, FaLink } from 'react-icons/fa'; // إضافة أيقونة الرابط
 
-// --- المكونات المساعدة (Spinner, ReviewSection, CommentsThread) تبقى كما هي ---
 function Spinner({ message }: { message: string }) {
     return (
         <div className="flex justify-center items-center h-screen">
@@ -21,7 +21,7 @@ function Spinner({ message }: { message: string }) {
             </svg>
             <span className="mr-4 text-slate-600">{message}</span>
         </div>
-       );
+      );
 }
 
 function ReviewSection({ title, children }: { title: string, children: React.ReactNode }) {
@@ -34,6 +34,64 @@ function ReviewSection({ title, children }: { title: string, children: React.Rea
         </section>
     );
 }
+
+// ✅ 1. تعديل مكون عرض المصادر لعرض الأسماء بدلاً من الروابط
+function SourcesSection({ sources }: { sources: Source[] }) {
+    const t = useTranslations('ReviewPage');
+    const locale = useLocale();
+    const validSources = sources.filter(source => source.url && source.nameAr);
+
+    if (validSources.length === 0) {
+        return <p className="text-gray-500 mt-4">{t('noContent')}</p>;
+    }
+
+    return (
+        <section className="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 className="text-2xl font-bold text-slate-800 mb-6">{t('mainSourcesLabel')}</h2>
+            <ul className="space-y-3 list-disc list-inside">
+                {validSources.map(source => (
+                    <li key={source.id}>
+                        <a
+                            href={source.url!}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                        >
+                            {locale === 'ar' ? source.nameAr : (source.nameEn || source.nameAr)}
+                        </a>
+                    </li>
+                ))}
+            </ul>
+        </section>
+    );
+}
+
+// ✅ 2. مكون جديد صغير لعرض مصادر الادعاءات
+function ClaimSourcesList({ sources }: { sources: Source[] }) {
+    const t = useTranslations('ReviewPage');
+    const locale = useLocale();
+    const validSources = sources.filter(source => source.url && source.nameAr);
+
+    if (validSources.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="mt-6">
+            <h5 className="font-bold text-md text-slate-600 mb-3 flex items-center gap-2"><FaLink /> {t('claimSourcesLabel')}</h5>
+            <ul className="space-y-2 list-disc list-inside bg-slate-100 p-4 rounded-lg">
+                {validSources.map(source => (
+                    <li key={source.id}>
+                        <a href={source.url!} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">
+                            {locale === 'ar' ? source.nameAr : (source.nameEn || source.nameAr)}
+                        </a>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
 
 function CommentsThread({ comments }: { comments: Comment[] }) {
     const t = useTranslations('ReviewPage');
@@ -59,7 +117,6 @@ function CommentsThread({ comments }: { comments: Comment[] }) {
     );
 }
 
-// --- المكون الرئيسي للصفحة ---
 export default function ReviewPage() {
     const params = useParams();
     const router = useRouter();
@@ -74,8 +131,6 @@ export default function ReviewPage() {
     const [error, setError] = useState<string | null>(null);
     const [commentContent, setCommentContent] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // --- ✅ 1. تبسيط حالة نافذة التأكيد ---
     const [confirmation, setConfirmation] = useState<{ isOpen: boolean; title: string; message: string; onConfirm: () => void; } | null>(null);
 
     useEffect(() => {
@@ -86,6 +141,7 @@ export default function ReviewPage() {
                 const data = await getDoubtById(id);
                 setDoubt(data);
             } catch (err) {
+                console.error("Failed to fetch doubt:", err);
                 setError(t('loadingError'));
                 addNotification(t('loadingError'), 'error');
             } finally {
@@ -95,17 +151,16 @@ export default function ReviewPage() {
         fetchDoubt();
     }, [id, t, addNotification]);
 
-    // --- ✅ 2. تبسيط دالة تغيير الحالة ---
     const handleStatusChange = (newStatus: 'NeedsRevision' | 'PendingApproval' | 'Published') => {
         if (!doubt) return;
-        
+
         if (newStatus === 'NeedsRevision' && doubt.comments.length === 0 && !commentContent.trim()) {
             addNotification(t('addCommentFirstError'), 'warning');
             return;
         }
 
         const confirmMessageKey = newStatus === 'NeedsRevision' ? 'confirmRequestRevision' : newStatus === 'PendingApproval' ? 'confirmApproveAndElevate' : 'confirmApproveAndPublish';
-        
+
         setConfirmation({
             isOpen: true,
             title: t('confirmActionTitle'),
@@ -113,18 +168,15 @@ export default function ReviewPage() {
             onConfirm: async () => {
                 setIsSubmitting(true);
                 try {
-                    // إذا كان الإجراء يتطلب مراجعة وكان هناك تعليق جديد، أضفه أولاً
                     if (newStatus === 'NeedsRevision' && commentContent.trim()) {
                         const newComment = await addComment(doubt.id, { section: 'general', content: commentContent });
                         setDoubt(prev => prev ? { ...prev, comments: [...prev.comments, newComment] } : null);
                         setCommentContent('');
                     }
-                    
-                    // ثم قم بتحديث حالة الشبهة
+
                     await updateDoubtStatus(doubt.id, newStatus);
                     addNotification(t('statusUpdateSuccess'), 'success');
-                    
-                    // أخيرًا، أعد التوجيه بعد فترة قصيرة
+
                     setTimeout(() => router.push('/dashboard/review'), 1500);
 
                 } catch (err) {
@@ -133,7 +185,7 @@ export default function ReviewPage() {
                     addNotification(errorMessage, 'error');
                 } finally {
                     setIsSubmitting(false);
-                    setConfirmation(null); // أغلق النافذة بعد الانتهاء
+                    setConfirmation(null);
                 }
             }
         });
@@ -144,12 +196,9 @@ export default function ReviewPage() {
     if (!doubt) return <div className="text-center text-slate-500 p-8">{t('notFound')}</div>;
 
     const title = locale === 'ar' ? doubt.titleAr : (doubt.titleEn || doubt.titleAr);
-    const summary = locale === 'ar' ? doubt.summaryAr : (doubt.summaryEn || doubt.summaryAr);
-    const quickReply = locale === 'ar' ? doubt.quickReplyAr : (doubt.quickReplyEn || doubt.quickReplyAr);
 
     return (
         <>
-            {/* --- ✅ 3. تبسيط استخدام نافذة التأكيد --- */}
             {confirmation && (
                 <ConfirmationModal
                     isOpen={confirmation.isOpen}
@@ -171,37 +220,61 @@ export default function ReviewPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                         <main className="lg:col-span-2 space-y-10">
                             <ReviewSection title={t('summarySectionTitle')}>
-                                <h3>{t('summaryLabel')}</h3>
-                                <p>{summary}</p>
-                                <hr/>
-                                <h3>{t('quickReplyLabel')}</h3>
-                                <p>{quickReply}</p>
+                                <h3 className="font-bold text-lg text-slate-800">{t('titleArLabel')}</h3>
+                                <p className="mb-4 p-3 bg-gray-50 rounded-md border">{doubt.titleAr}</p>
+
+                                <h3 className="font-bold text-lg text-slate-800">{t('titleEnLabel')}</h3>
+                                <p className="mb-4 p-3 bg-gray-50 rounded-md border">{doubt.titleEn || <span className="text-gray-400">{t('noContent')}</span>}</p>
+                                <hr />
+
+                                <h3 className="font-bold text-lg text-slate-800">{t('quickReplyArLabel')}</h3>
+                                <p className="mb-4 p-3 bg-gray-50 rounded-md border">{doubt.quickReplyAr}</p>
+
+                                <h3 className="font-bold text-lg text-slate-800">{t('quickReplyEnLabel')}</h3>
+                                <p className="mb-4 p-3 bg-gray-50 rounded-md border">{doubt.quickReplyEn || <span className="text-gray-400">{t('noContent')}</span>}</p>
                             </ReviewSection>
+
                             <ReviewSection title={t('detailedRebuttalSectionTitle')}>
-                                <div className="space-y-6">
-                                    {doubt.detailedRebuttal.map((claim) => (
-                                        <div key={claim.id} className="p-4 bg-slate-50 rounded-lg border">
-                                            <h4 className="font-bold text-lg text-slate-800 mb-2">{locale === 'ar' ? claim.claimAr : (claim.claimEn || claim.claimAr)}</h4>
-                                            <p>{locale === 'ar' ? claim.responseAr : (claim.responseEn || claim.responseAr)}</p>
+                                <div className="space-y-8">
+                                    {doubt.detailedRebuttal.map((claim: Claim) => (
+                                        <div key={claim.id} className="p-6 bg-slate-50 rounded-lg border-l-4 border-slate-200">
+                                            <h4 className="font-bold text-lg text-slate-800 mb-2">{t('claimArLabel')}</h4>
+                                            <p className="mb-4">{claim.claimAr}</p>
+
+                                            <h4 className="font-bold text-lg text-slate-800 mb-2">{t('claimEnLabel')}</h4>
+                                            <p className="mb-4">{claim.claimEn || <span className="text-gray-400">{t('noContent')}</span>}</p>
+
+                                            <hr className="my-4" />
+
+                                            <h4 className="font-bold text-lg text-slate-800 mb-2">{t('responseArLabel')}</h4>
+                                            <p className="mb-4">{claim.responseAr}</p>
+
+                                            <h4 className="font-bold text-lg text-slate-800 mb-2">{t('responseEnLabel')}</h4>
+                                            <p>{claim.responseEn || <span className="text-gray-400">{t('noContent')}</span>}</p>
+                                            
+                                            {/* ✅ 3. إضافة عرض مصادر الادعاء هنا */}
+                                            <ClaimSourcesList sources={claim.sources} />
                                         </div>
                                     ))}
                                 </div>
                             </ReviewSection>
+
+                            <SourcesSection sources={doubt.mainSources} />
                         </main>
 
                         <aside className="lg:col-span-1">
                             <div className="sticky top-24 space-y-6">
                                 <CommentsThread comments={doubt.comments} />
-                                
+
                                 <div className="bg-white p-6 rounded-2xl shadow-xl">
                                     <h3 className={`text-lg font-bold text-slate-700 border-b pb-4 mb-4 ${locale === 'ar' ? 'text-right' : 'text-left'}`}>{t('decisionSectionTitle')}</h3>
-                                    
+
                                     <div className="space-y-4">
                                         <p className="text-sm text-slate-500">{t('decisionPrompt')}</p>
-                                        
+
                                         <div>
                                             <label className="text-sm font-semibold text-gray-600 mb-2 block">{t('addComment')}</label>
-                                            <textarea 
+                                            <textarea
                                                 value={commentContent}
                                                 onChange={(e) => setCommentContent(e.target.value)}
                                                 rows={3}
@@ -211,12 +284,11 @@ export default function ReviewPage() {
                                             ></textarea>
                                         </div>
 
-                                        {/* --- ✅ 4. تعطيل الأزرار أثناء الإرسال --- */}
                                         <button onClick={() => handleStatusChange('NeedsRevision')} disabled={isSubmitting} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold disabled:bg-red-400">
                                             {isSubmitting ? <FaSpinner className="animate-spin" /> : <FaTimes />}
                                             <span>{t('requestRevisionButton')}</span>
                                         </button>
-                                        
+
                                         {currentUser?.role === 'Reviewer' && (
                                             <button onClick={() => handleStatusChange('PendingApproval')} disabled={isSubmitting} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold disabled:bg-blue-400">
                                                 {isSubmitting ? <FaSpinner className="animate-spin" /> : <FaPaperPlane />}

@@ -257,6 +257,13 @@ export interface PublicDoubtDetail {
   url: string | null;
 }[];
 }
+export interface MyDoubt {
+  id: number;
+  titleAr: string;
+  titleEn?: string;
+  status: string;
+  updatedAt: string;
+}
 // ====================================================================
 // 5. الأنواع العامة (General & Error Types)
 // ====================================================================
