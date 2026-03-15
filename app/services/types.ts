@@ -31,7 +31,15 @@ export interface AddCommentPayload {
   content: string;
   section: string;
 }
+export interface LockResponse {
+  message: string;
+  lockedAt: string; // التواريخ تأتي كسلاسل نصية من JSON
+  lockedBy: number;
+}
 
+export interface UnlockResponse {
+  message: string;
+}
 
 // ====================================================================
 // 2. أنواع لوحة التحكم (Dashboard)

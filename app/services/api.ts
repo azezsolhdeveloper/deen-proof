@@ -18,7 +18,9 @@ import {
   PaginatedResult,
    Comment,
   AddCommentPayload,
-   MyDoubt
+   MyDoubt,
+  LockResponse,  // ✅ إضافة
+  UnlockResponse // ✅ إضافة
 } from './types';
 import { FeedbackSubmission } from './types'; // ✅ استيراد النوع الجديد
 
@@ -144,7 +146,15 @@ export async function getFeedbackSubmissions(): Promise<FeedbackSubmission[]> { 
   const response = await api.get('/dashboard/feedback');
   return response.data;
 }
+export const lockDoubt = async (id: string): Promise<LockResponse> => {
+  const response = await api.post(`/doubts/${id}/lock`);
+  return response.data;
+};
 
+export const unlockDoubt = async (id: string): Promise<UnlockResponse> => {
+  const response = await api.post(`/doubts/${id}/unlock`);
+  return response.data;
+};
 // ====================================================================
 //  API الزوار (Public API)
 // ====================================================================

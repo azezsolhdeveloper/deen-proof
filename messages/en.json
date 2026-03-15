@@ -329,7 +329,11 @@
     "responseEnLabel": "Response to Claim (English)",
     "noContent": "Not provided",
     "claimSourcesLabel": "Sources for this Claim",
-    "mainSourcesLabel": "Main Rebuttal Sources"
+    "mainSourcesLabel": "Main Rebuttal Sources",
+    "cancelReviewButton": "Cancel Review & Unlock Task",
+    "unlockSuccess": "Task unlocked successfully.",
+    "unlockError": "An error occurred while unlocking the task.",
+    "lockConflictError": "Sorry, another reviewer just locked this task."
 
   },
   "ProfilePage": {

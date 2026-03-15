@@ -325,7 +325,11 @@
     "responseEnLabel": "الرد على الادعاء (إنجليزي)",
     "noContent": "لا يوجد",
     "claimSourcesLabel": "مصادر هذا الادعاء",
-    "mainSourcesLabel": "المصادر الرئيسية للرد" 
+    "mainSourcesLabel": "المصادر الرئيسية للرد",
+    "cancelReviewButton": "إلغاء المراجعة وتحرير المهمة",
+    "unlockSuccess": "تم تحرير المهمة بنجاح.",
+    "unlockError": "حدث خطأ أثناء تحرير المهمة.",
+    "lockConflictError": "عذرًا، لقد قام مراجع آخر بحجز هذه المهمة قبلك." 
 
   },
   "ProfilePage": {
