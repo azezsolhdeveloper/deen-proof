@@ -1,15 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+// ✅ 1. إضافة useRef إلى قائمة الاستيراد
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '../../../../../i18n/routing';
+// ✅ 2. إزالة lockDoubt لأننا لم نعد نستخدمه هنا
 import { getDoubtById, updateDoubtStatus, addComment, lockDoubt, unlockDoubt } from '../../../../services/api';
 import { DoubtDetail, Comment, ApiError, Source, Claim } from '../../../../services/types';
 import { useAuth } from '../../../../context/AuthContext';
 import { useNotification } from '../../../../context/NotificationContext';
 import ConfirmationModal from '../../../../components/ConfirmationModal';
 import { FaCheck, FaTimes, FaPaperPlane, FaSpinner, FaLink, FaUnlock } from 'react-icons/fa';
+import { isAxiosError } from 'axios';
+// --- المكونات المساعدة (تبقى كما هي) ---
 
 function Spinner({ message }: { message: string }) {
     return (
@@ -20,7 +24,7 @@ function Spinner({ message }: { message: string }) {
             </svg>
             <span className="mr-4 text-slate-600">{message}</span>
         </div>
-     );
+       );
 }
 
 function ReviewSection({ title, children }: { title: string, children: React.ReactNode }) {
@@ -86,6 +90,7 @@ function CommentsThread({ comments }: { comments: Comment[] }) {
     );
 }
 
+// --- المكون الرئيسي للصفحة ---
 export default function ReviewPage() {
     const params = useParams();
     const router = useRouter();
@@ -102,55 +107,79 @@ export default function ReviewPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [confirmation, setConfirmation] = useState<{ isOpen: boolean; title: string; message: string; onConfirm: () => void; } | null>(null);
 
-    useEffect(() => {
-        if (!id) return;
+ 
+// ... (داخل المكون)
+const isLockedByThisUser = useRef(false);
+    const effectRan = useRef(false); // <-- هذا هو المتغير الحاسم لمنع StrictMode
 
-        let isLocked = false;
+useEffect(() => {
+    if (!id || !currentUser) return;
 
-        const lockAndFetch = async () => {
-            setIsLoading(true);
-            try {
-                if (currentUser?.role === 'Reviewer') {
-                    await lockDoubt(id);
-                    isLocked = true;
-                }
-                const data = await getDoubtById(id);
-                setDoubt(data);
-            } catch (err) {
-                const apiError = err as ApiError;
-               const errorMessage = apiError.response?.data?.message || apiError.message || "";
-    
-    if (errorMessage.includes("محجوزة حاليًا") || errorMessage.includes("locked")) {
-        // هذه هي رسالة الخطأ التي تأتي من الخادم عند حدوث تضارب في القفل (409 Conflict)
-        addNotification(t('lockConflictError'), 'warning');
-        router.push('/dashboard/review');
-    } else {
-        // أي خطأ آخر (مثل خطأ في الشبكة، خطأ في الخادم، إلخ)
-        setError(t('loadingError'));
-        addNotification(t('loadingError'), 'error');
+    if (process.env.NODE_ENV === 'development') {
+        if (effectRan.current === true) return;
+        effectRan.current = true;
     }
-            } finally {
-                setIsLoading(false);
-            }
-        };
 
-        lockAndFetch();
-
-        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isLocked) {
-                unlockDoubt(id);
+    const initializePage = async () => {
+        setIsLoading(true);
+        try {
+            if (currentUser.role === 'Reviewer') {
+                await lockDoubt(id);
+                isLockedByThisUser.current = true;
             }
-        };
-        
-        window.addEventListener('beforeunload', handleBeforeUnload);
-
-        return () => {
-            if (isLocked) {
-                unlockDoubt(id);
+            const data = await getDoubtById(id);
+            setDoubt(data);
+        } catch (err) {
+            if (isAxiosError(err) && err.response?.status === 409) {
+                const errorMessage = err.response?.data?.message || "هذه المهمة محجوزة حاليًا.";
+                addNotification(errorMessage, 'warning');
+                router.push('/dashboard/review');
+            } else {
+                setError(t('loadingError'));
+                addNotification(t('loadingError'), 'error');
             }
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-        };
-    }, [id, t, addNotification, router, currentUser?.role]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    initializePage();
+
+    // --- ✅✅✅ بداية الإصلاح الحاسم لفك القفل ✅✅✅ ---
+
+    // دالة فك القفل، يمكن استدعاؤها من عدة أماكن
+    const performUnlock = async () => {
+        if (isLockedByThisUser.current) {
+            try {
+                // لا تنتظر الاستجابة، فقط أرسل الطلب
+                await unlockDoubt(id);
+                isLockedByThisUser.current = false; // قم بتحديث الحالة محليًا
+            } catch (unlockError) {
+                // يمكنك تسجيل الخطأ هنا إذا أردت، ولكن لا تزعج المستخدم
+                console.error("Failed to unlock doubt on cleanup:", unlockError);
+            }
+        }
+    };
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        // استخدم هذا فقط كإجراء احترازي أخير
+        if (isLockedByThisUser.current) {
+            performUnlock();
+        }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // دالة التنظيف الرئيسية
+    return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+        // قم باستدعاء دالة فك القفل عند مغادرة المكون
+        performUnlock();
+    };
+    // --- نهاية الإصلاح ---
+
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [id, currentUser]);
 
     const handleStatusChange = (newStatus: 'NeedsRevision' | 'PendingApproval' | 'Published') => {
         if (!doubt) return;
@@ -186,18 +215,19 @@ export default function ReviewPage() {
         });
     };
 
-    const handleUnlockAndExit = async () => {
-        setIsSubmitting(true);
-        try {
-            await unlockDoubt(id);
-            addNotification(t('unlockSuccess'), 'success'); 
-
-            router.push('/dashboard/review');
-        } catch (err) {
-            addNotification(t('unlockError'), 'error');
-            setIsSubmitting(false);
-        }
-    };
+  const handleUnlockAndExit = async () => {
+    setIsSubmitting(true);
+    try {
+        // فقط استدعِ دالة فك القفل
+        await unlockDoubt(id);
+        addNotification(t('unlockSuccess'), 'success'); 
+        router.push('/dashboard/review');
+    } catch (err) {
+        addNotification(t('unlockError'), 'error');
+    } finally {
+        setIsSubmitting(false);
+    }
+};
 
     if (isLoading) return <Spinner message={t('loadingMessage')} />;
     if (error) return <div className="text-center text-red-500 p-8">{error}</div>;
@@ -286,15 +316,16 @@ export default function ReviewPage() {
                                                 <span>{t('approveAndPublishButton')}</span>
                                             </button>
                                         )}
-                                        {(currentUser?.role === 'Reviewer') && (
-                                            <>
-                                                <hr className="my-4 border-t-2 border-dashed" />
-                                                <button onClick={handleUnlockAndExit} disabled={isSubmitting} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 font-bold disabled:bg-gray-400">
-                                                    <FaUnlock />
-                                                    <span>{t('cancelReviewButton')}</span>
-                                                </button>
-                                            </>
-                                        )}
+                                      
+                                    {doubt?.lockedByReviewerId === currentUser?.id && (
+    <>
+        <hr className="my-4 border-t-2 border-dashed" />
+        <button onClick={handleUnlockAndExit} disabled={isSubmitting} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 font-bold disabled:bg-gray-400">
+            <FaUnlock />
+            <span>{t('cancelReviewButton')}</span>
+        </button>
+    </>
+)}
                                     </div>
                                 </div>
                             </div>

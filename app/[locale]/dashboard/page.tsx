@@ -7,15 +7,15 @@ import { DashboardData, ReviewTask, ActivityLog } from '../../services/types';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from '../../../i18n/routing';
 import { IconType } from 'react-icons';
-// --- ✅✅✅ 1. استيراد كل الأيقونات المطلوبة ✅✅✅ ---
 import { 
   FaRegFileAlt, FaRegClock, FaRegCheckCircle, 
   FaRegTimesCircle, FaPlus, FaArrowLeft, FaHistory,
-  FaList, FaThumbsUp // ✅ أضف الأيقونة الجديدة هنا
+  FaList, FaThumbsUp
 } from 'react-icons/fa';
 import { useNotification } from '../../context/NotificationContext';
 import { ApiError } from '../../services/types';
-// --- ✅✅✅ 2. نقل المكونات المساعدة خارج المكون الرئيسي ✅✅✅ ---
+
+// --- المكونات المساعدة (تبقى كما هي) ---
 
 interface StatCardProps {
   label: string;
@@ -37,14 +37,7 @@ const StatCard = ({ label, value, icon: Icon, color }: StatCardProps) => (
     </div>
   </div>
 );
-const getLinkForTask = (task: ReviewTask): string => {
-  // إذا كانت المهمة "تحتاج تعديل"، فهي للباحث ويجب أن تذهب لصفحة التحرير
-  if (task.status === 'NeedsRevision') {
-    return `/dashboard/doubts/edit/${task.id}`;
-  }
-  // أي مهمة أخرى (PendingReview, PendingApproval) هي للمراجع ويجب أن تذهب لصفحة المراجعة
-  return `/dashboard/review/${task.id}`;
-};
+
 const ShortcutCard = ({ label, href, icon: Icon }: { label: string, href: string, icon: IconType }) => (
   <Link href={href} className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 flex flex-col justify-center items-center text-center group">
     <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-gray-100 text-gray-500 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors mb-3">
@@ -54,25 +47,35 @@ const ShortcutCard = ({ label, href, icon: Icon }: { label: string, href: string
   </Link>
 );
 
-// --- نهاية نقل المكونات ---
+// --- ✅✅✅ دالة توجيه الروابط (مهمة جدًا) ✅✅✅ ---
+// هذه الدالة تحدد الرابط الصحيح للمهمة بناءً على حالتها
+const getLinkForTask = (task: ReviewTask): string => {
+  // إذا كانت المهمة "تحتاج تعديل"، فهي للباحث ويجب أن تذهب لصفحة التحرير
+  if (task.status === 'NeedsRevision') {
+    return `/dashboard/doubts/edit/${task.id}`;
+  }
+  // أي مهمة أخرى (PendingReview, PendingApproval) هي للمراجع ويجب أن تذهب لصفحة المراجعة
+  return `/dashboard/review/${task.id}`;
+};
 
+
+// --- المكون الرئيسي للصفحة ---
 export default function DashboardHomePage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
   const t = useTranslations('DashboardHome');
   const locale = useLocale();
-const { addNotification } = useNotification();
- useEffect(() => {
+  const { addNotification } = useNotification();
+
+  useEffect(() => {
     getDashboardData()
         .then(setData)
         .catch(err => {
-            // استخدام إشعار من نوع "خطأ"
             addNotification(t('fetchError'), 'error');
         })
         .finally(() => setIsLoading(false));
-}, [addNotification, t]); // <-- أضف addNotification و t إلى مصفوفة الاعتماديات
-
+  }, [addNotification, t]);
 
   if (isLoading) return (
     <div className="flex items-center justify-center min-h-[70vh]">
@@ -93,7 +96,6 @@ const { addNotification } = useNotification();
               {t('summary')}
             </p>
           </div>
-          {/* --- ✅✅✅ 3. إخفاء زر "إضافة محتوى" إذا لم يكن المستخدم مصرحًا له ✅✅✅ --- */}
           {(user?.role === 'Researcher' || user?.role === 'Admin' || user?.role === 'SuperAdmin') && (
             <Link 
               href="/dashboard/doubts/new" 
@@ -106,39 +108,34 @@ const { addNotification } = useNotification();
       </header>
 
       <section className="flex flex-wrap gap-6 mb-12">
-    {(user?.role === 'Admin' || user?.role === 'SuperAdmin') && (
-        <>
-            {/* 
-              - flex-grow: يسمح للبطاقة بالنمو.
-              - basis-[calc(33.33%-1rem)]: العرض الأساسي هو ثلث الحاوية ناقص جزء من المسافة (gap).
-            */}
-            <div className="flex-grow basis-[calc(33.33%-1rem)] min-w-[280px]"><StatCard label={t('totalEntries')} value={data?.stats.totalDoubts} icon={FaRegFileAlt} color="#3B82F6" /></div>
-            <div className="flex-grow basis-[calc(33.33%-1rem)] min-w-[280px]"><StatCard label={t('published')} value={data?.stats.published} icon={FaRegCheckCircle} color="#10B981" /></div>
-            <div className="flex-grow basis-[calc(33.33%-1rem)] min-w-[280px]"><StatCard label={t('inReview')} value={data?.stats.pendingReview} icon={FaRegClock} color="#F59E0B" /></div>
-            <div className="flex-grow basis-[calc(50%-0.75rem)] min-w-[280px]"><StatCard label={t('needsRevision')} value={data?.stats.needsRevision} icon={FaRegTimesCircle} color="#EF4444" /></div>
-            <div className="flex-grow basis-[calc(50%-0.75rem)] min-w-[280px]"><StatCard label={t('totalLikes')} value={data?.stats.totalLikes} icon={FaThumbsUp} color="#10B981" /></div>
-        </>
-    )}
-    {user?.role === 'Reviewer' && (
-        <>
-            <div className="flex-grow basis-[calc(50%-0.75rem)] min-w-[280px]"><StatCard label={t('inReview')} value={data?.stats.pendingReview} icon={FaRegClock} color="#F59E0B" /></div>
-            <div className="flex-grow basis-[calc(50%-0.75rem)] min-w-[280px]"><ShortcutCard label={t('viewAllTasks')} href="/dashboard/review" icon={FaList} /></div>
-        </>
-    )}
-    {user?.role === 'Researcher' && (
-        <>
-            <div className="flex-grow basis-[calc(33.33%-1rem)] min-w-[280px]"><StatCard label={t('myDrafts')} value={data?.stats.myDrafts} icon={FaRegFileAlt} color="#6B7280" /></div>
-            <div className="flex-grow basis-[calc(33.33%-1rem)] min-w-[280px]"><StatCard label={t('myRevisions')} value={data?.stats.myRevisions} icon={FaRegTimesCircle} color="#EF4444" /></div>
-            <div className="flex-grow basis-[calc(33.33%-1rem)] min-w-[280px]"><ShortcutCard label={t('addNewContent')} href="/dashboard/doubts/new" icon={FaPlus} /></div>
-        </>
-    )}
-</section>
+        {(user?.role === 'Admin' || user?.role === 'SuperAdmin') && (
+            <>
+                <div className="flex-grow basis-[calc(33.33%-1rem)] min-w-[280px]"><StatCard label={t('totalEntries')} value={data?.stats.totalDoubts} icon={FaRegFileAlt} color="#3B82F6" /></div>
+                <div className="flex-grow basis-[calc(33.33%-1rem)] min-w-[280px]"><StatCard label={t('published')} value={data?.stats.published} icon={FaRegCheckCircle} color="#10B981" /></div>
+                <div className="flex-grow basis-[calc(33.33%-1rem)] min-w-[280px]"><StatCard label={t('inReview')} value={data?.stats.pendingReview} icon={FaRegClock} color="#F59E0B" /></div>
+                <div className="flex-grow basis-[calc(50%-0.75rem)] min-w-[280px]"><StatCard label={t('needsRevision')} value={data?.stats.needsRevision} icon={FaRegTimesCircle} color="#EF4444" /></div>
+                <div className="flex-grow basis-[calc(50%-0.75rem)] min-w-[280px]"><StatCard label={t('totalLikes')} value={data?.stats.totalLikes} icon={FaThumbsUp} color="#10B981" /></div>
+            </>
+        )}
+        {user?.role === 'Reviewer' && (
+            <>
+                <div className="flex-grow basis-[calc(50%-0.75rem)] min-w-[280px]"><StatCard label={t('inReview')} value={data?.stats.pendingReview} icon={FaRegClock} color="#F59E0B" /></div>
+                <div className="flex-grow basis-[calc(50%-0.75rem)] min-w-[280px]"><ShortcutCard label={t('viewAllTasks')} href="/dashboard/review" icon={FaList} /></div>
+            </>
+        )}
+        {user?.role === 'Researcher' && (
+            <>
+                <div className="flex-grow basis-[calc(33.33%-1rem)] min-w-[280px]"><StatCard label={t('myDrafts')} value={data?.stats.myDrafts} icon={FaRegFileAlt} color="#6B7280" /></div>
+                <div className="flex-grow basis-[calc(33.33%-1rem)] min-w-[280px]"><StatCard label={t('myRevisions')} value={data?.stats.myRevisions} icon={FaRegTimesCircle} color="#EF4444" /></div>
+                <div className="flex-grow basis-[calc(33.33%-1rem)] min-w-[280px]"><ShortcutCard label={t('addNewContent')} href="/dashboard/doubts/new" icon={FaPlus} /></div>
+            </>
+        )}
+      </section>
 
       <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className={`lg:col-span-2 bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/80 shadow-sm ${locale === 'ar' ? 'text-right' : 'text-left'}`}>
           <div className="flex items-center justify-between mb-6">
              <h2 className="text-xl font-bold text-gray-800">{t('yourTasks')}</h2>
-             {/* --- ✅✅✅ 4. إخفاء رابط "عرض الكل" إذا لم يكن هناك مهام ✅✅✅ --- */}
              {data?.myTasks && data.myTasks.length > 0 && (
                <Link href="/dashboard/review" className="text-sm font-semibold text-blue-600 hover:underline">{t('viewAll')}</Link>
              )}
@@ -151,7 +148,7 @@ const { addNotification } = useNotification();
                 return (
                   <Link 
                     key={task.id} 
-                    href={getLinkForTask(task)}
+                    href={getLinkForTask(task)} // ✅ استخدام الدالة الجديدة هنا
                     className="group flex items-center justify-between p-4 rounded-lg transition-all bg-gray-50 hover:bg-blue-50 hover:shadow-md"
                   >
                     <div className="flex items-center gap-4">
@@ -160,12 +157,12 @@ const { addNotification } = useNotification();
                       </div>
                       <div>
                         <h3 className="font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{title}</h3>
-<p className="text-sm text-gray-500">
-  {t('byAuthor', { authorName: task.authorName })}
-  <span className="mx-2 text-gray-300">•</span>
-  {/* ✅✅✅ (اختياري) عرض التاريخ الجديد */}
-  {new Date(task.updatedAt).toLocaleDateString(locale, { day: 'numeric', month: 'short' })}
-</p>                      </div>
+                        <p className="text-sm text-gray-500">
+                          {t('byAuthor', { authorName: task.authorName })}
+                          <span className="mx-2 text-gray-300">•</span>
+                          {new Date(task.updatedAt).toLocaleDateString(locale, { day: 'numeric', month: 'short' })}
+                        </p>                      
+                      </div>
                     </div>
                     <div className={`text-gray-400 group-hover:text-blue-600 transition-transform ${locale === 'ar' ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1 rotate-180'}`}>
                       <FaArrowLeft />

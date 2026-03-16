@@ -74,6 +74,8 @@ export interface DoubtDetail {
   detailedRebuttal: Claim[];
   mainSources: Source[];
   comments: Comment[];
+  lockedByReviewerId?: number | null; // اجعله اختياريًا وقد يكون null
+  lockedAt?: string | null; 
 }
 
 /**
@@ -123,7 +125,9 @@ export interface ReviewTask {
   titleEn?: string;
   authorName: string;
   updatedAt: string;
-  status: string; // ✅✅✅ أضف هذا السطر المهم ✅✅✅
+  status: string;
+  lockedByReviewerId?: number | null;
+  lockedByReviewerName?: string | null;
 }
 export interface FeedbackSubmission {
   id: number;
