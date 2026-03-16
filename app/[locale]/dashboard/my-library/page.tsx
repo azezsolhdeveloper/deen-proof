@@ -18,9 +18,6 @@ type MyDoubt = {
     updatedAt: string;
 };
 
-// --- ✅✅✅ بداية الإصلاح النهائي ✅✅✅ ---
-
-// 1. إنشاء نوع مخصص لمفاتيح الحالة المحتملة
 type StatusTranslationKey = 
     | 'status_Draft'
     | 'status_PendingReview'
@@ -31,7 +28,6 @@ type StatusTranslationKey =
 const StatusBadge = ({ status }: { status: string }) => {
     const t = useTranslations('EditDoubtPage');
     
-    // 2. إنشاء المفتاح الديناميكي
     const statusKey = `status_${status}` as StatusTranslationKey;
     
     const styles: { [key: string]: string } = {
@@ -43,15 +39,11 @@ const StatusBadge = ({ status }: { status: string }) => {
     };
     
     return (
-        // 3. استخدام المفتاح المكتوب بشكل آمن
         <span className={`px-2 py-1 text-xs font-bold rounded-full ${styles[status] || 'bg-gray-200'}`}>
             {t(statusKey)}
         </span>
     );
 };
-
-// --- نهاية الإصلاح النهائي ---
-
 
 export default function MyLibraryPage() {
     const t = useTranslations('MyLibraryPage');
@@ -71,15 +63,33 @@ export default function MyLibraryPage() {
             .finally(() => setIsLoading(false));
     }, []);
 
-    const filteredDoubts = useMemo(() => {
+    const sortedAndFilteredDoubts = useMemo(() => {
+        let results = allDoubts;
+
         if (debouncedSearchTerm) {
             const lowercasedTerm = debouncedSearchTerm.toLowerCase();
-            return allDoubts.filter(doubt =>
+            results = results.filter(doubt =>
                 doubt.titleAr.toLowerCase().includes(lowercasedTerm) ||
                 (doubt.titleEn && doubt.titleEn.toLowerCase().includes(lowercasedTerm))
             );
         }
-        return allDoubts;
+
+        const statusOrder: { [key: string]: number } = {
+            'NeedsRevision': 1,
+            'Draft': 2,
+            'PendingReview': 3,
+            'PendingApproval': 4,
+            'Published': 5,
+        };
+
+        return results.sort((a, b) => {
+            const orderA = statusOrder[a.status] || 99;
+            const orderB = statusOrder[b.status] || 99;
+            if (orderA !== orderB) {
+                return orderA - orderB;
+            }
+            return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        });
     }, [debouncedSearchTerm, allDoubts]);
 
     return (
@@ -115,7 +125,7 @@ export default function MyLibraryPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredDoubts.map(doubt => (
+                                {sortedAndFilteredDoubts.map(doubt => (
                                     <tr key={doubt.id} className={`border-b hover:bg-gray-50 ${locale === 'ar' ? 'text-right' : 'text-left'}`}>
                                         <td className="px-6 py-4 font-medium text-gray-900">
                                             {locale === 'ar' ? doubt.titleAr : (doubt.titleEn || doubt.titleAr)}
@@ -135,7 +145,7 @@ export default function MyLibraryPage() {
                             </tbody>
                         </table>
                     )}
-                    {filteredDoubts.length === 0 && !isLoading && (
+                    {sortedAndFilteredDoubts.length === 0 && !isLoading && (
                         <div className="p-16 text-center text-gray-500">
                             <p>{t('noResults')}</p>
                         </div>
